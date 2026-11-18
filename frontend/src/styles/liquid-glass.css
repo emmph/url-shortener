@@ -1,0 +1,290 @@
+/* Adaptive Apple Liquid Glass tokens (Light white default + Dark OS theme) */
+
+:root {
+  --lg-bg: #ffffff;
+  --lg-orb-1: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+  --lg-orb-2: linear-gradient(135deg, #e0f2fe, #e2e8f0);
+  --lg-orb-opacity: 0.22;
+  --lg-text: #0f172a;
+  --lg-muted: #475569;
+  --lg-placeholder: #94a3b8;
+  --lg-card-bg: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(248, 250, 252, 0.72) 55%,
+    rgba(255, 255, 255, 0.82) 100%
+  );
+  --lg-card-border: rgba(15, 23, 42, 0.09);
+  --lg-card-shadow:
+    0 20px 50px rgba(15, 23, 42, 0.08),
+    0 2px 8px rgba(15, 23, 42, 0.04),
+    inset 0 1px 1px rgba(255, 255, 255, 0.95);
+  --lg-pill-bg: rgba(241, 245, 249, 0.75);
+  --lg-pill-border: rgba(15, 23, 42, 0.09);
+  --lg-pill-inset: rgba(255, 255, 255, 0.9);
+  --lg-seg-bg: rgba(241, 245, 249, 0.9);
+  --lg-seg-active-bg: rgba(255, 255, 255, 0.96);
+  --lg-input-bg: rgba(255, 255, 255, 0.92);
+  --lg-input-focus-bg: #ffffff;
+  --lg-input-border: rgba(15, 23, 42, 0.14);
+  --lg-btn-bg: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+  --lg-btn-text: #ffffff;
+  --lg-btn-border: rgba(15, 23, 42, 0.9);
+  --lg-slider-track: rgba(15, 23, 42, 0.14);
+  --lg-slider-thumb: #0f172a;
+  --lg-slider-thumb-border: #ffffff;
+  --lg-copy-bg: rgba(15, 23, 42, 0.08);
+  --lg-copy-hover-bg: rgba(15, 23, 42, 0.14);
+}
+
+:root[data-theme="dark"] {
+  --lg-bg: #090d16;
+  --lg-orb-1: linear-gradient(135deg, #1e3a8a, #312e81);
+  --lg-orb-2: linear-gradient(135deg, #0c4a6e, #1e1b4b);
+  --lg-orb-opacity: 0.34;
+  --lg-text: #f8fafc;
+  --lg-muted: #94a3b8;
+  --lg-placeholder: #64748b;
+  --lg-card-bg: linear-gradient(
+    145deg,
+    rgba(30, 41, 59, 0.72) 0%,
+    rgba(15, 23, 42, 0.62) 55%,
+    rgba(30, 41, 59, 0.68) 100%
+  );
+  --lg-card-border: rgba(255, 255, 255, 0.16);
+  --lg-card-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.55),
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.22);
+  --lg-pill-bg: rgba(30, 41, 59, 0.68);
+  --lg-pill-border: rgba(255, 255, 255, 0.14);
+  --lg-pill-inset: rgba(255, 255, 255, 0.14);
+  --lg-seg-bg: rgba(15, 23, 42, 0.72);
+  --lg-seg-active-bg: rgba(255, 255, 255, 0.16);
+  --lg-input-bg: rgba(15, 23, 42, 0.72);
+  --lg-input-focus-bg: rgba(15, 23, 42, 0.9);
+  --lg-input-border: rgba(255, 255, 255, 0.16);
+  --lg-btn-bg: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+  --lg-btn-text: #0f172a;
+  --lg-btn-border: rgba(255, 255, 255, 0.9);
+  --lg-slider-track: rgba(255, 255, 255, 0.2);
+  --lg-slider-thumb: #f8fafc;
+  --lg-slider-thumb-border: #0f172a;
+  --lg-copy-bg: rgba(255, 255, 255, 0.12);
+  --lg-copy-hover-bg: rgba(255, 255, 255, 0.2);
+}
+
+.liquid-stage {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: var(--lg-bg);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--lg-text);
+  transition: background-color 220ms ease, color 220ms ease;
+}
+
+.liquid-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: var(--lg-orb-opacity);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.liquid-orb-1 {
+  width: 420px;
+  height: 420px;
+  top: -140px;
+  left: -100px;
+  background: var(--lg-orb-1);
+  animation: liquidFloat 18s ease-in-out infinite alternate;
+}
+
+.liquid-orb-2 {
+  width: 380px;
+  height: 380px;
+  bottom: -120px;
+  right: -80px;
+  background: var(--lg-orb-2);
+  animation: liquidFloat 22s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes liquidFloat {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(28px, -20px, 0) scale(1.06);
+  }
+}
+
+.liquid-glass-card {
+  position: relative;
+  border-radius: 18px;
+  background: var(--lg-card-bg);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid var(--lg-card-border);
+  box-shadow: var(--lg-card-shadow);
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 260ms ease;
+}
+
+.liquid-glass-pill {
+  border-radius: 12px;
+  background: var(--lg-pill-bg);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid var(--lg-pill-border);
+  box-shadow:
+    inset 0 1px 1px var(--lg-pill-inset),
+    0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.liquid-theme-btn {
+  border-radius: 10px;
+  background: var(--lg-pill-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--lg-pill-border);
+  color: var(--lg-muted);
+  transition: color 160ms ease, border-color 160ms ease;
+  cursor: pointer;
+}
+
+.liquid-theme-btn:hover {
+  color: var(--lg-text);
+  border-color: var(--lg-card-border);
+}
+
+.liquid-segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--lg-seg-bg);
+  border: 1px solid var(--lg-pill-border);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.liquid-segmented-btn {
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--lg-muted);
+  transition: all 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  cursor: pointer;
+}
+
+.liquid-segmented-btn:hover {
+  color: var(--lg-text);
+}
+
+.liquid-segmented-btn[data-active="true"] {
+  background: var(--lg-seg-active-bg);
+  color: var(--lg-text);
+  font-weight: 600;
+  border: 1px solid var(--lg-pill-border);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 var(--lg-pill-inset);
+}
+
+.liquid-input {
+  width: 100%;
+  border-radius: 12px;
+  background: var(--lg-input-bg);
+  border: 1px solid var(--lg-input-border);
+  color: var(--lg-text);
+  outline: none;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.liquid-input::placeholder {
+  color: var(--lg-placeholder);
+}
+
+.liquid-input:focus {
+  background: var(--lg-input-focus-bg);
+  border-color: #0062ba;
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.04),
+    0 0 0 3px rgba(0, 98, 186, 0.2);
+}
+
+.liquid-button {
+  border-radius: 12px;
+  background: var(--lg-btn-bg);
+  color: var(--lg-btn-text);
+  font-weight: 600;
+  border: 1px solid var(--lg-btn-border);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), filter 180ms ease;
+  cursor: pointer;
+}
+
+.liquid-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.liquid-button:active:not(:disabled) {
+  transform: translateY(0) scale(0.99);
+}
+
+.liquid-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.liquid-copy-btn {
+  border-radius: 8px;
+  background: var(--lg-copy-bg);
+  color: var(--lg-text);
+  transition: background-color 150ms ease;
+  cursor: pointer;
+}
+
+.liquid-copy-btn:hover {
+  background: var(--lg-copy-hover-bg);
+}
+
+.liquid-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 6px;
+  background: var(--lg-slider-track);
+  outline: none;
+}
+
+.liquid-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  background: var(--lg-slider-thumb);
+  border: 2px solid var(--lg-slider-thumb-border);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: transform 140ms ease;
+}
+
+.liquid-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+.liquid-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  background: var(--lg-slider-thumb);
+  border: 2px solid var(--lg-slider-thumb-border);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}

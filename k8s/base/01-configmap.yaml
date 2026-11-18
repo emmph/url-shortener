@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: url-shortener-config
+  namespace: url-shortener
+data:
+  APP_NAME: "URL Shortener"
+  BASE_URL: "https://short.example.com"
+  ENVIRONMENT: "production"
+  POSTGRES_DB: "url_shortener"
+  POSTGRES_USER: "url_shortener"
+  REDIS_URL: "redis://redis:6379/0"
+  ALLOW_MEMORY_FALLBACK: "false"
+  SERVE_FRONTEND_DIST: "false"
+  COOKIE_SECURE: "true"
+  MAX_CUSTOM_CLICKS: "250"
+  SHORT_CODE_LENGTH: "7"
+  RATE_LIMIT_CREATE_PER_MIN: "30"
+  SCANNER_MAX_BYTES: "65536"
+  SCANNER_MAX_REDIRECTS: "5"
+  MAX_SCAN_QUEUE_SIZE: "5000"
+  SCANNER_MIN_BLOCK_CVSS: "4.0"
+  SCANNER_ESTIMATED_SECONDS: "15"
+  ANALYTICS_FLUSH_INTERVAL: "3"
+  ANALYTICS_BATCH_SIZE: "500"
+  RUN_EMBEDDED_WORKER: "true"
