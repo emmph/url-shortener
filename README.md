@@ -119,7 +119,7 @@ url-shortener/
 
 #### 1. Clone the repository and create `.env`
 ```bash
-git clone <YOUR_GITHUB_REPO_URL> url-shortener
+git clone https://github.com/emmph/url-shortener.git
 cd url-shortener
 cp .env.example .env
 ```
