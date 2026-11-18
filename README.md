@@ -1,51 +1,51 @@
-# URL Shortener — Fast, Safe Short Links with Background CVE Screening
+# 🔗 URL Shortener — Fast, Safe Short Links with Background CVE Screening
 
-Высокопроизводительный сервис сокращения ссылок с поддержкой **постоянных (`Unlimited`)** и **лимитированных (`Limited clicks`: 1–250)** ссылок, **Zero-DB-Hit** редиректами через Redis Lua-скрипты, встроенным асинхронным сканером уязвимостей (CVE / SSRF / фишинг), невидимой защитой без капч и двумя специализированными дизайн-системами (**Apple Liquid Glass** для публичного интерфейса и **Norwegian Designsystemet** для админ-панели).
-
----
-
-## Ключевые возможности
-
-### 1. Два режима сокращения ссылок
-- **Unlimited**: классическая постоянная многоразовая ссылка.
-- **Limited clicks (`1..250`)**: по умолчанию `1` переход (одноразовая ссылка) с синхронным ползунком и полем ручного ввода до `250` кликов.
-- По достижении лимита переходов, при удалении ссылки или истечении срока действия открывается единая информативная страница **`/error/410?reason=unavailable`**.
-
-### 2. Мгновенная выдача и фоновая проверка безопасности (CVE & Threats)
-- **Без задержек при создании**: пользователь сразу получает короткий URL в статусе `PENDING`, а проверка запускается асинхронно в фоновом пуле (`scan_worker`).
-- **Экран ожидания (`/scanning/:shortCode`)**: если перейти по ссылке до завершения сканирования, отображается прогресс и ориентировочное время до открытия (автоопрос Redis без обращений к БД каждые `2s` с автоматическим редиректом по завершении).
-- **Строгая политика вердиктов**:
-  - `NONE` / `LOW` (`CVSS < 4.0`) — ссылка переходит в `SAFE` и начинает работать.
-  - `MEDIUM` / `HIGH` / `CRITICAL` (`CVSS >= 4.0`), фишинговые шаблоны или опасные исполняемые файлы — короткая ссылка **удаляется**, а исходный URL навсегда заносится в таблицу `blocked_urls` и Redis Set `blocked:urls` (повторное сокращение блокируется с кодом `403`).
-- **Кэширование результатов**: доменные проверки кэшируются на **12 часов** (`scan:host:{domain}`), а запросы CVE для версий ПО — на **7 дней** (`cve:pkg:{product}:{ver}`). Опрашиваются встроенная база сигнатур CVE и API **OSV.dev**.
-
-### 3. Многоуровневая безопасность без капч (`Zero-Overhead Security`)
-- **Bot & Prefetch Shield**: запросы `HEAD`, заголовки предзагрузки (`Purpose: prefetch`, `Sec-Purpose: prefetch`, `X-Purpose: preview`) и превью-боты мессенджеров (`TelegramBot`, `WhatsApp`, `Discordbot`, `Slackbot`, `Twitterbot`, `facebookexternalhit`, `vkShare`) получают нейтральный `200 OK` HTML с OpenGraph-тегами **до обращения к счётчику** — лимит одноразовых ссылок не сжигается.
-- **Zero-Cost URL Sanitizer**: мгновенная проверка в памяти схем (`http://` и `https://` только), длины (`<= 2048`), запрета учётных данных (`user:pass@host`), управляющих символов (`CR/LF/NUL`) и IDN/Punycode-гомографов (смешение латиницы и кириллицы/греческого).
-- **Safe Async Resolver (Anti-SSRF & Redirect Chain Guard)**: перед подключением и на каждом из до `5` хопов редиректа проверяет IP-адреса через `ipaddress` и блокирует loopback, приватные подсети и cloud-metadata (`127.0.0.0/8`, `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `169.254.169.254/32`, `::1`, `fc00::/7`, `fe80::/10`).
-- **Anti-Bruteforce 404/DEAD Shield**: более `30` обращений в минуту к несуществующим или мёртвым кодам с одного суточного `ip_hash` временно блокируются (`429 Too Many Requests` на `5` минут).
-- **Privacy by Design**: сырые IP-адреса и строки `User-Agent` не сохраняются в БД; для уникальных кликов используется суточно-ротируемый хеш `SHA-256(IP + IP_HASH_SALT + YYYY-MM-DD)[:32]`.
-- **Защита админ-панели**: хеширование пароля **Argon2id**, JWT в `HttpOnly; SameSite=Strict` cookie и блокировка IP (`admin:lockout`) после `5` неверных попыток входа на `15` минут.
-
-### 4. Дизайн-система и единая обработка ошибок
-- **Публичный UI (Apple Liquid Glass)**: чистый минимализм (краткий заголовок и описание сервиса над стеклянной карточкой, переключатель режимов, расширенное поле ввода URL и кнопка `Shorten`), автоматическая светлая (`#FFFFFF`) и тёмная (`#090D16`) тема по `prefers-color-scheme` + переключатель `Auto / Light / Dark`.
-- **Админ-панель (`/admin`, Norwegian Designsystemet)**: ленивая загрузка (`React.lazy()`), чёткие таблицы (`tabular-nums`), графики `Recharts`, управление ссылками (`Enable/Disable`, `Rescan`, редактирование лимита `1..250`, удаление), журнал заблокированных CVE-адресов и динамические настройки.
-- **Единый шаблон ошибок (`ErrorPage.tsx` — `/error/:code?reason=...`)**: один универсальный компонент обслуживает все HTTP-коды (`403`, `404`, `410`, `413`, `422`, `429`, `500`, `503`), включая ошибки уровня Nginx (`413`, `502`, `504`).
+A high-performance, security-hardened URL shortener supporting **permanent (`Unlimited`)** and **click-limited (`Limited clicks`: 1–250)** links, **Zero-DB-Hit** redirects via Redis Lua scripts, an embedded asynchronous **CVE & Threat Scanner**, zero-overhead captcha-free security layers, and two purpose-built design systems (**Apple Liquid Glass** for public pages and **Norwegian Designsystemet** for the admin dashboard).
 
 ---
 
-## Технологический стек
+## ✨ Key Features
 
-| Слой | Технологии |
+### 🎯 1. Flexible Link Modes
+- **Unlimited**: Standard permanent, reusable short links.
+- **Limited clicks (`1..250`)**: Defaults to `1` click (one-time link) with a synchronized range slider and numeric input up to `250` visits.
+- **Unified Lifecycle Errors**: Once a link reaches its click limit, expires, or gets removed, subsequent visits cleanly route to **`/error/410?reason=unavailable`**.
+
+### 🛡️ 2. Instant Issuance & Background Security Scanning
+- **Zero Creation Latency**: Users receive their short link immediately in `PENDING` state while inspection runs asynchronously inside an embedded worker pool (`scan_worker`).
+- **Interactive Scan Screen (`/scanning/:shortCode`)**: Opening a link before scanning completes renders a live waiting screen reading directly from Redis (0 DB hits) every `2s`, auto-redirecting as soon as it passes.
+- **Strict Risk Policy**:
+  - `NONE` / `LOW` (`CVSS < 4.0`) — promoted to `SAFE` and activated.
+  - `MEDIUM` / `HIGH` / `CRITICAL` (`CVSS >= 4.0`), phishing URL patterns, or dangerous executable payloads — the short link is **automatically deleted**, and the destination hash is permanently added to `blocked_urls` and Redis Set `blocked:urls` (future submissions fail fast with `403 Forbidden`).
+- **Two-Level Result Caching**: Host security reports are cached for **12 hours** (`scan:host:{domain}`), and software CVE lookups (built-in signatures + **OSV.dev API**) are cached for **7 days** (`cve:pkg:{product}:{ver}`).
+
+### 🔒 3. Seamless Security Without CAPTCHAs
+- **Bot & Prefetch Shield**: Intercepts `HEAD` requests, browser prefetch headers (`Purpose: prefetch`, `Sec-Purpose: prefetch`, `X-Purpose: preview`), and messenger link-preview crawlers (`TelegramBot`, `WhatsApp`, `Discordbot`, `Slackbot`, `Twitterbot`, `facebookexternalhit`, `vkShare`) **before touching Redis Lua counters** — returning a lightweight `200 OK` OpenGraph response so one-time links are never burned accidentally.
+- **Zero-Cost URL Sanitizer**: In-memory microsecond validation allowing only `http://` and `https://`, enforcing length `<= 2048`, blocking embedded credentials (`user:pass@host`), stripping/blocking control chars (`CR/LF/NUL`), and detecting mixed-script IDN/Punycode homograph spoofing.
+- **Safe Async Resolver (Anti-SSRF & Redirect Chain Guard)**: Validates resolved IPs via Python's `ipaddress` module on every request and across up to `5` redirect hops, blocking loopback, private networks, and cloud metadata ranges (`127.0.0.0/8`, `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `169.254.169.254/32`, `::1`, `fc00::/7`, `fe80::/10`).
+- **Anti-Bruteforce 404/DEAD Shield**: Blocks IPs exceeding `30` misses per minute to nonexistent/dead short codes (`429 Too Many Requests` for `5` minutes).
+- **Privacy by Design**: Raw IP addresses and raw `User-Agent` strings are never persisted in the database; unique click tracking uses a daily-rotating `SHA-256(IP + IP_HASH_SALT + YYYY-MM-DD)[:32]` hash.
+- **Hardened Admin Authentication**: Passwords verified with **Argon2id**, JWT delivered via strict `HttpOnly; SameSite=Strict` cookies, and IP lockout (`admin:lockout`) for `15` minutes after `5` failed login attempts.
+
+### 🎨 4. Dual Design Systems & Unified Error Handling
+- **Public UI (Apple Liquid Glass)**: Ultra-minimal layout featuring a clean intro header above a translucent glass card, adaptive **Light (`#FFFFFF`) & Dark (`#090D16`)** themes via `prefers-color-scheme` plus a corner `Auto / Light / Dark` switcher.
+- **Admin Dashboard (`/admin`, Norwegian Designsystemet)**: Code-split via `React.lazy()`, high-contrast data tables with `tabular-nums`, **Recharts** analytics, link controls (`Enable/Disable`, `Rescan`, inline limit editing `1..250`, delete), CVE blocked URL logs, and live service settings.
+- **Unified Error Page (`ErrorPage.tsx` — `/error/:code?reason=...`)**: One parameterized component renders every error state (`403`, `404`, `410`, `413`, `422`, `429`, `500`, `503`), including Nginx proxy errors (`413`, `502`, `504`).
+
+---
+
+## 🧰 Tech Stack
+
+| Layer | Technologies |
 | :--- | :--- |
-| **Backend** | Python 3.12, FastAPI, Uvicorn (`uvloop` + `httptools`), SQLAlchemy 2.0 (`asyncpg` / `aiosqlite`), Alembic, Pydantic Settings, `httpx` (streaming <= `64 KB`), PyJWT, `pwdlib[argon2]`, `prometheus-fastapi-instrumentator` |
+| **Backend** | Python 3.12, FastAPI, Uvicorn (`uvloop` + `httptools`), SQLAlchemy 2.0 (`asyncpg` / `aiosqlite`), Alembic, Pydantic Settings, `httpx` (streaming `<= 64 KB`), PyJWT, `pwdlib[argon2]`, `prometheus-fastapi-instrumentator` |
 | **Frontend** | React 19, TypeScript 5, Vite 6, Tailwind CSS v4, TanStack React Query, React Router 7, Axios, Recharts, Lucide React |
-| **БД и Кэш** | PostgreSQL 16 (Alpine), Redis 7 (Alpine, `--maxmemory 128mb --maxmemory-policy volatile-lru`) с Lua-скриптами и fallback `InMemoryRedisEngine` для локальной разработки |
-| **Инфраструктура** | Docker & Docker Compose, Nginx Unprivileged 1.27 (CSP, Gzip, Keepalive), Kubernetes манифесты (`k8s/base` с `NetworkPolicy` и `readOnlyRootFilesystem`) |
+| **Data & Cache** | PostgreSQL 16 (Alpine), Redis 7 (Alpine, `--maxmemory 128mb --maxmemory-policy volatile-lru`) with atomic Lua scripts and an `InMemoryRedisEngine` fallback for local dev |
+| **Infrastructure** | Docker & Docker Compose, Nginx Unprivileged 1.27 (CSP, Gzip, Keepalive), Kubernetes manifests (`k8s/base` with `NetworkPolicy` & `readOnlyRootFilesystem`) |
 
 ---
 
-## Как всё устроено и работает
+## 🏗️ How It Works
 
 ```mermaid
 flowchart LR
@@ -71,23 +71,23 @@ flowchart LR
     Flusher -->|"Batch INSERT + UPDATE"| PG
 ```
 
-1. **Создание (`POST /api/v1/links`)**: URL проходит синхронную санитизацию в памяти, `O(1)` проверку в `blocked:urls` и проверку глубины очереди (`MAX_SCAN_QUEUE_SIZE`). Запись сохраняется в PostgreSQL со статусом `PENDING`, прогревается хеш в Redis и задача уходит в `scan:queue`.
-2. **Асинхронное сканирование (`scan_worker`)**: воркер дедуплицирует одновременные проверки одного URL (`scan:inflight:{url_hash}`), потоково загружает до `64 KB` HTML с проверкой каждого IP на SSRF, извлекает заголовки/сигнатуры и оценивает CVE-риск. При `CVSS >= 4.0` удаляет ссылку из `links` и переносит хеш в `blocked_urls`.
-3. **Горячий редирект (`GET /{short_code}`)**: после `Bot & Prefetch Shield` выполняется один Lua-скрипт в Redis (`< 0.5 мс`), который проверяет статус (`PENDING` / `SAFE` / `DEAD`), атомарно списывает `remaining` (для лимитированных ссылок), ставит tombstone `DEAD` при исчерпании и кладёт компактное событие в `analytics:buffer`.
-4. **Пакетный сброс (`analytics_flusher`)**: каждые `3` секунды (пачками до `500` записей) события одной транзакцией пишутся в PostgreSQL (`click_events` + обновление счётчика в `links`).
+1. **Create (`POST /api/v1/links`)**: The submitted URL goes through synchronous in-memory sanitization, an `O(1)` lookup in `blocked:urls`, and queue backpressure checks (`MAX_SCAN_QUEUE_SIZE`). The link is saved in PostgreSQL as `PENDING`, warmed in Redis, and queued in `scan:queue`.
+2. **Background Scan (`scan_worker`)**: Concurrent scans for identical URLs are deduplicated via `scan:inflight:{url_hash}`. The worker streams up to `64 KB` of HTML while checking every hop for SSRF, fingerprints headers/meta tags, and evaluates CVE risk. Links with `CVSS >= 4.0` are deleted from `links` and permanently stored in `blocked_urls`.
+3. **Hot Redirect (`GET /{short_code}`)**: Requests pass through `Bot & Prefetch Shield`, then hit a single atomic Redis Lua script (`< 0.5 ms`) that verifies scan status (`PENDING` / `SAFE` / `DEAD`), decrements `remaining` on limited links, sets a `DEAD` tombstone upon exhaustion, and pushes a compact analytics payload into `analytics:buffer`.
+4. **Write-Behind Analytics (`analytics_flusher`)**: Every `3` seconds (or up to `500` records per batch), queued click events are flushed to PostgreSQL in one transaction (`click_events` batch insert + aggregated click count update on `links`).
 
 ---
 
-## Структура проекта
+## 📁 Project Structure
 
 ```text
 url-shortener/
-├── .env.example                 # Шаблон переменных окружения
-├── .gitignore                   # Исключения для Git (.env, *.db, .venv, node_modules, dist)
-├── docker-compose.yml           # Production-стек: postgres, redis, migrate, backend, frontend
+├── .env.example                 # Environment variable template
+├── .gitignore                   # Git exclusions (.env, *.db, .venv, node_modules, dist, PLAN.md)
+├── docker-compose.yml           # Production stack: postgres, redis, migrate, backend, frontend
 ├── backend/
-│   ├── Dockerfile               # Multi-stage сборка Python 3.12-slim (non-root)
-│   ├── alembic/                 # Миграции схемы БД и индексов
+│   ├── Dockerfile               # Multi-stage Python 3.12-slim build (non-root)
+│   ├── alembic/                 # Database migrations and partial/covering indexes
 │   ├── app/
 │   │   ├── api/                 # links, redirect, auth, admin, health, error_utils
 │   │   ├── core/                # config, url_security, ssrf_guard, bot_shield, security, rate_limit, shortener
@@ -95,117 +95,117 @@ url-shortener/
 │   │   ├── models/              # Link, BlockedUrl, ClickEvent, ServiceSettings
 │   │   ├── services/            # scanner, analytics, settings_service, admin
 │   │   └── workers/             # scan_worker, analytics_flusher
-│   └── tests/                   # Pytest набор (7 интеграционных и unit-сценариев)
+│   └── tests/                   # Pytest integration & unit suite (7 core scenarios)
 ├── frontend/
 │   ├── Dockerfile               # Node 22 build -> nginx-unprivileged:1.27-alpine
-│   ├── public/favicon.svg       # Иконка вкладки браузера
+│   ├── public/favicon.svg       # Browser tab icon
 │   └── src/
-│       ├── api/                 # Axios-клиент с interceptor ошибок и cookies
+│       ├── api/                 # Axios client with cookies & error interceptor
 │       ├── components/          # ThemeToggle, ProtectedRoute, ErrorBoundary
-│       ├── hooks/               # useTheme (Light/Dark OS sync), React Query хуки
+│       ├── hooks/               # useTheme (Light/Dark OS sync), React Query hooks
 │       ├── pages/               # Home, ScanningWait, ErrorPage, LinkStats, AdminLogin, AdminDashboard
 │       └── styles/              # liquid-glass.css (Apple Liquid Glass) + designsystemet.css
-├── infra/nginx/default.conf     # Конфигурация Nginx (CSP, проксирование, единые error_page)
-└── k8s/                         # Kubernetes манифесты (base 00..09 + NetworkPolicy)
+├── infra/nginx/default.conf     # Nginx reverse proxy config (CSP, routing, unified error_page)
+└── k8s/                         # Kubernetes manifests (base 00..09 + NetworkPolicy)
 ```
 
 ---
 
-## Запуск сервиса на сервере
+## 🚀 Deploying on Your Server
 
-### Способ 1: Docker Compose (Рекомендуется для Production VPS)
+### 🐳 Option 1: Docker Compose (Recommended for Production VPS)
 
-**Требования**: Linux-сервер (Ubuntu/Debian), установленные `Docker` и `Docker Compose` (`docker compose version`), а также `openssl`.
+**Prerequisites**: Linux server (Ubuntu/Debian), `Docker`, `Docker Compose` (`docker compose version`), and `openssl`.
 
-#### 1. Клонируйте репозиторий и создайте `.env`
+#### 1. Clone the repository and create `.env`
 ```bash
-git clone <URL_ВАШЕГО_РЕПОЗИТОРИЯ> url-shortener
+git clone <YOUR_GITHUB_REPO_URL> url-shortener
 cd url-shortener
 cp .env.example .env
 ```
 
-#### 2. Сгенерируйте боевые секреты и хеш пароля администратора
-Сгенерируйте случайные строки для `JWT_SECRET_KEY`, `IP_HASH_SALT` и `POSTGRES_PASSWORD`:
+#### 2. Generate production secrets and an Argon2id admin password hash
+Generate strong random hex keys for `JWT_SECRET_KEY`, `IP_HASH_SALT`, and `POSTGRES_PASSWORD`:
 ```bash
 openssl rand -hex 32
 ```
 
-Сгенерируйте `Argon2id`-хеш вашего пароля администратора (замените `YOUR_STRONG_PASSWORD`):
+Generate an **Argon2id** hash for your admin password (replace `YOUR_STRONG_PASSWORD`):
 ```bash
 docker run --rm python:3.12-slim sh -c \
   "pip install -q 'pwdlib[argon2]' && python -c 'from pwdlib import PasswordHash; print(PasswordHash.recommended().hash(\"YOUR_STRONG_PASSWORD\"))'"
 ```
 
-#### 3. Отредактируйте `.env`
-Откройте `.env` и задайте боевые значения:
+#### 3. Configure `.env`
+Edit `.env` with your production values:
 ```dotenv
-POSTGRES_PASSWORD=<сгенерированный_пароль_postgres>
-DATABASE_URL=postgresql+asyncpg://url_shortener:<сгенерированный_пароль_postgres>@postgres:5432/url_shortener
+POSTGRES_PASSWORD=<generated_postgres_password>
+DATABASE_URL=postgresql+asyncpg://url_shortener:<generated_postgres_password>@postgres:5432/url_shortener
 
 BASE_URL=https://your-domain.com
 ENVIRONMENT=production
 COOKIE_SECURE=true
 
-IP_HASH_SALT=<случайная_строка_hex>
-JWT_SECRET_KEY=<случайная_строка_hex_не_менее_32_байт>
+IP_HASH_SALT=<random_hex_salt>
+JWT_SECRET_KEY=<random_hex_key_at_least_32_bytes>
 
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=
-ADMIN_PASSWORD_HASH=<полученный_argon2id_хеш>
+ADMIN_PASSWORD_HASH=<generated_argon2id_hash>
 
 ALLOW_MEMORY_FALLBACK=false
 SERVE_FRONTEND_DIST=false
 ```
-> Примечание: при работе за HTTPS обязательно установите `COOKIE_SECURE=true`, а при тестировании по чистому HTTP без TLS (`http://IP:8080`) оставьте `COOKIE_SECURE=false`.
+> **Note**: Set `COOKIE_SECURE=true` when serving over HTTPS. If testing over plain HTTP (`http://SERVER_IP:8080`), set `COOKIE_SECURE=false` so browser admin cookies can be stored.
 
-#### 4. Соберите и запустите контейнеры
+#### 4. Build and start the stack
 ```bash
 docker compose up -d --build
 ```
-Сервис `migrate` автоматически применит миграции PostgreSQL (`alembic upgrade head`), после чего поднимутся `backend` (с встроенными воркерами) и `frontend` (`nginx-unprivileged` на порту `8080`).
+The `migrate` container automatically runs `alembic upgrade head`, after which `backend` (with embedded workers) and `frontend` (`nginx-unprivileged` on port `8080`) start cleanly.
 
-Проверьте состояние и готовность:
+Verify health and readiness:
 ```bash
 docker compose ps
 curl -s http://127.0.0.1:8080/readyz
-# Ожидаемый ответ: {"status":"ready","database":"up","redis":"up"}
+# Expected output: {"status":"ready","database":"up","redis":"up"}
 ```
 
-#### 5. Подключите домен и HTTPS (Reverse Proxy)
-Поставьте перед портом `127.0.0.1:8080` ваш обратный прокси для автоматического TLS (Let's Encrypt). Например, в **Caddy** (`/etc/caddy/Caddyfile`):
+#### 5. Attach a custom domain & HTTPS
+Place a TLS-terminating reverse proxy in front of `127.0.0.1:8080`. Example using **Caddy** (`/etc/caddy/Caddyfile`):
 ```text
 your-domain.com {
     reverse_proxy 127.0.0.1:8080
 }
 ```
-После перезагрузки Caddy сервис доступен на `https://your-domain.com`, а панель администратора — на `https://your-domain.com/admin/login`.
+Reload Caddy — your public site will be live at `https://your-domain.com` and the admin dashboard at `https://your-domain.com/admin/login`.
 
 ---
 
-### Способ 2: Kubernetes
+### ☸️ Option 2: Kubernetes
 
-1. Заполните боевые секреты и домен в `k8s/base/01-configmap.yaml`, `k8s/base/02-secrets.yaml` и `k8s/base/08-ingress.yaml`.
-2. Примените манифесты:
+1. Update secrets and domain configuration inside `k8s/base/01-configmap.yaml`, `k8s/base/02-secrets.yaml`, and `k8s/base/08-ingress.yaml`.
+2. Apply the manifests:
 ```bash
 kubectl apply -f k8s/base/
 kubectl -n url-shortener get pods
 ```
-Манифест `09-network-policy.yaml` изолирует `postgres` и `redis` только для подов `backend` и блокирует исходящий трафик сканера во внутренние подсети кластера.
+`09-network-policy.yaml` isolates `postgres` and `redis` access strictly to `backend` pods and blocks outbound scanner traffic toward private or metadata CIDR blocks.
 
 ---
 
-### Способ 3: Локальный запуск для разработки (без Docker)
+### 💻 Option 3: Local Development (No Docker Required)
 
-В dev-режиме бэкенд может работать на SQLite (`aiosqlite`) и встроенном `InMemoryRedisEngine` (`ALLOW_MEMORY_FALLBACK=true`), одновременно раздавая собранный `frontend/dist` (`SERVE_FRONTEND_DIST=true`).
+For local development, the backend supports SQLite (`aiosqlite`) paired with `InMemoryRedisEngine` (`ALLOW_MEMORY_FALLBACK=true`), and can serve `frontend/dist` directly (`SERVE_FRONTEND_DIST=true`).
 
-1. **Frontend**:
+1. **Build Frontend**:
 ```bash
 cd frontend
 npm install
 npm run build
 ```
 
-2. **Backend**:
+2. **Start Backend**:
 ```bash
 cd backend
 python3 -m venv .venv
@@ -214,9 +214,9 @@ pip install -r requirements.txt
 alembic upgrade head
 uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
-Для hot-reload фронтенда параллельно можно запустить `npm run dev` в `frontend/` (порт `5173`, прокси на `:8000`).
+*(Optional)* Run `npm run dev` inside `frontend/` on port `5173` for Vite HMR proxying API calls to `:8000`.
 
-3. **Запуск тестов**:
+3. **Run Test Suite**:
 ```bash
 cd backend
 .venv/bin/pytest -v
@@ -224,17 +224,17 @@ cd backend
 
 ---
 
-## Ключевые API-эндпоинты
+## 📡 Core API Endpoints
 
-| Метод и путь | Назначение |
+| Method & Path | Description |
 | :--- | :--- |
-| `POST /api/v1/links` | Создание ссылки (`original_url`, `max_clicks`: `null` или `1..250`) |
-| `GET` / `HEAD /{short_code}` | Защищённый редирект (`307`), бот-заглушка (`200`), экран ожидания (`/scanning/:code`) или `/error/410` |
-| `GET /api/v1/links/{code}/scan-status` | Прогресс и ETA фоновой CVE-проверки (читается только из Redis) |
-| `GET /api/v1/links/{code}/stats` | Детальная статистика кликов, устройств и браузеров |
-| `POST /api/v1/admin/login` | Вход администратора (установка `HttpOnly` JWT Cookie) |
-| `GET /api/v1/admin/overview` | Глобальная аналитика и состояние Redis/очередей |
-| `GET/PATCH/DELETE /api/v1/admin/links...` | Управление ссылками, лимитами и принудительное пересканирование (`rescan`) |
-| `GET/DELETE /api/v1/admin/blocked-urls...` | Просмотр CVE-отчётов и разблокировка URL |
-| `GET/PUT /api/v1/admin/settings` | Динамическое изменение лимитов, порога CVSS и чёрного списка доменов |
-| `GET /healthz`, `GET /readyz`, `GET /metrics` | Health-пробы и метрики Prometheus |
+| `POST /api/v1/links` | Create a short link (`original_url`, `max_clicks`: `null` or `1..250`) |
+| `GET` / `HEAD /{short_code}` | Safe redirect (`307`), bot preview stub (`200`), `/scanning/:code`, or `/error/410` |
+| `GET /api/v1/links/{code}/scan-status` | Live scan progress and ETA (served exclusively from Redis) |
+| `GET /api/v1/links/{code}/stats` | Click metrics, timeseries, devices, and browsers breakdown |
+| `POST /api/v1/admin/login` | Admin sign-in (sets `HttpOnly` JWT Cookie) |
+| `GET /api/v1/admin/overview` | Global KPI metrics, 7-day chart data, and queue/Redis status |
+| `GET/PATCH/DELETE /api/v1/admin/links...` | Search, filter, toggle active status, edit click limit, rescan, or delete |
+| `GET/DELETE /api/v1/admin/blocked-urls...` | Inspect CVE reports and unblock domains/URLs |
+| `GET/PUT /api/v1/admin/settings` | Live updates for rate limits, CVSS block threshold, and domain blacklist |
+| `GET /healthz`, `GET /readyz`, `GET /metrics` | Liveness/readiness probes and Prometheus metrics |
