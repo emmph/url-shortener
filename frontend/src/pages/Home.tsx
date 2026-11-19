@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { Check, Copy, Link2 } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Copy, Download, Link2, QrCode } from 'lucide-react'
+import { QRCodeCanvas } from 'qrcode.react'
 import { createShortLink } from '../api/client'
 import { ThemeToggle } from '../components/ThemeToggle'
 import type { ApiErrorPayload, LinkCreateResponse } from '../types'
@@ -16,6 +17,8 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<LinkCreateResponse | null>(null)
   const [copied, setCopied] = useState(false)
+  const [showQr, setShowQr] = useState(false)
+  const qrCanvasRef = useRef<HTMLCanvasElement | null>(null)
 
   // Keep slider and number box synced within 1..250
   const handleLimitChange = (raw: number) => {
@@ -34,6 +37,7 @@ export default function Home() {
 
     setLoading(true)
     setCopied(false)
+    setShowQr(false)
     try {
       const created = await createShortLink({
         original_url: trimmed,
@@ -77,6 +81,29 @@ export default function Home() {
     }
   }
 
+  // Export QR code canvas as a crisp white-background JPG file
+  const handleDownloadQr = () => {
+    const sourceCanvas = qrCanvasRef.current
+    if (!sourceCanvas || !result) return
+
+    const exportCanvas = document.createElement('canvas')
+    exportCanvas.width = 512
+    exportCanvas.height = 512
+    const ctx = exportCanvas.getContext('2d')
+    if (!ctx) return
+
+    // Paint pure white backdrop so JPEG stays sharp
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height)
+    ctx.imageSmoothingEnabled = false
+    ctx.drawImage(sourceCanvas, 0, 0, exportCanvas.width, exportCanvas.height)
+
+    const link = document.createElement('a')
+    link.href = exportCanvas.toDataURL('image/jpeg', 0.95)
+    link.download = `qr-${result.short_code}.jpg`
+    link.click()
+  }
+
   return (
     <main className="liquid-stage flex flex-col items-center justify-center px-4 py-12">
       <div className="liquid-orb liquid-orb-1" aria-hidden="true" />
@@ -99,8 +126,8 @@ export default function Home() {
           className="mx-auto max-w-[540px] text-sm leading-relaxed sm:text-base"
           style={{ color: 'var(--lg-muted)' }}
         >
-          Create permanent or click-limited links in seconds. Every destination is
-          screened for known vulnerabilities and malicious hosts in the background.
+          Create permanent or click-limited links with instant QR codes in seconds. Every
+          destination is screened for known vulnerabilities and malicious hosts in the background.
         </p>
       </header>
 
@@ -185,33 +212,95 @@ export default function Home() {
           </div>
         </form>
 
-        {/* Compact result box shown after creation */}
+        {/* Compact result box + expandable QR code block */}
         {result && (
-          <div className="liquid-glass-pill mt-5 flex items-center justify-between gap-3 px-4 py-2.5">
-            <a
-              href={result.short_url}
-              className="truncate text-sm font-medium underline underline-offset-4"
-              style={{ color: 'var(--lg-text)' }}
-            >
-              {result.short_url}
-            </a>
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="liquid-copy-btn inline-flex shrink-0 items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold"
-            >
-              {copied ? (
-                <>
-                  <Check className="h-3.5 w-3.5" />
-                  Copied
-                </>
-              ) : (
-                <>
-                  <Copy className="h-3.5 w-3.5" />
-                  Copy
-                </>
-              )}
-            </button>
+          <div className="mt-5 space-y-3">
+            <div className="liquid-glass-pill flex items-center justify-between gap-3 px-4 py-2.5">
+              <a
+                href={result.short_url}
+                className="truncate text-sm font-medium underline underline-offset-4"
+                style={{ color: 'var(--lg-text)' }}
+              >
+                {result.short_url}
+              </a>
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="liquid-copy-btn inline-flex shrink-0 items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold"
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-3.5 w-3.5" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3.5 w-3.5" />
+                    Copy
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Subtle QR toggle inside the main card */}
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => setShowQr((prev) => !prev)}
+                aria-expanded={showQr}
+                className="liquid-copy-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium"
+              >
+                <QrCode className="h-3.5 w-3.5" />
+                {showQr ? 'Hide QR code' : 'Show QR code'}
+                {showQr ? (
+                  <ChevronUp className="h-3.5 w-3.5" />
+                ) : (
+                  <ChevronDown className="h-3.5 w-3.5" />
+                )}
+              </button>
+            </div>
+
+            {/* Expanded QR preview and JPG export inside main card */}
+            {showQr && (
+              <div className="liquid-glass-pill flex flex-col items-center justify-between gap-4 p-4 sm:flex-row">
+                <div className="flex items-center gap-4">
+                  <div className="rounded-[10px] bg-white p-2 shadow-sm">
+                    <QRCodeCanvas
+                      ref={qrCanvasRef}
+                      value={result.short_url}
+                      size={132}
+                      level="M"
+                      bgColor="#ffffff"
+                      fgColor="#0f172a"
+                      marginSize={2}
+                    />
+                  </div>
+                  <div className="space-y-1 text-left">
+                    <div
+                      className="text-sm font-semibold"
+                      style={{ color: 'var(--lg-text)' }}
+                    >
+                      QR Code Ready
+                    </div>
+                    <div
+                      className="text-xs leading-relaxed"
+                      style={{ color: 'var(--lg-muted)' }}
+                    >
+                      Scan directly or save as a JPG image.
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleDownloadQr}
+                  className="liquid-button inline-flex shrink-0 items-center gap-2 px-4 py-2.5 text-xs sm:text-sm"
+                >
+                  <Download className="h-4 w-4" />
+                  Download JPG
+                </button>
+              </div>
+            )}
           </div>
         )}
       </section>

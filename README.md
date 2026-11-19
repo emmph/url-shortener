@@ -6,9 +6,10 @@ A high-performance, security-hardened URL shortener supporting **permanent (`Unl
 
 ## ✨ Key Features
 
-### 🎯 1. Flexible Link Modes
+### 🎯 1. Flexible Link Modes & Instant QR Codes
 - **Unlimited**: Standard permanent, reusable short links.
 - **Limited clicks (`1..250`)**: Defaults to `1` click (one-time link) with a synchronized range slider and numeric input up to `250` visits.
+- **Instant QR Code & `.jpg` Download**: Every generated short link includes an expandable **"Show QR code"** panel on the home page with a crisp **"Download JPG"** (`qr-<code>.jpg`) export alongside one-click copy.
 - **Unified Lifecycle Errors**: Once a link reaches its click limit, expires, or gets removed, subsequent visits cleanly route to **`/error/410?reason=unavailable`**.
 
 ### 🛡️ 2. Instant Issuance & Background Security Scanning
