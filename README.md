@@ -1,6 +1,6 @@
 # 🔗 URL Shortener — Fast, Safe Short Links with Background CVE Screening
 
-A high-performance, security-hardened URL shortener supporting **permanent (`Unlimited`)** and **click-limited (`Limited clicks`: 1–250)** links, **Zero-DB-Hit** redirects via Redis Lua scripts, an embedded asynchronous **CVE & Threat Scanner**, zero-overhead captcha-free security layers, and two purpose-built design systems (**Apple Liquid Glass** for public pages and **Norwegian Designsystemet** for the admin dashboard).
+A high-performance, security-hardened URL shortener supporting **permanent (`Unlimited`)** and **click-limited (`Limited clicks`: 1–250)** links, **Zero-DB-Hit** redirects via Redis Lua scripts, an embedded asynchronous **CVE & Threat Scanner**, zero-overhead captcha-free security layers, and two purpose-built design systems (**Optical Glass / Ink** for public pages and **Norwegian Designsystemet** for the admin dashboard).
 
 ---
 
@@ -29,7 +29,7 @@ A high-performance, security-hardened URL shortener supporting **permanent (`Unl
 - **Hardened Admin Authentication**: Passwords verified with **Argon2id**, JWT delivered via strict `HttpOnly; SameSite=Strict` cookies, and IP lockout (`admin:lockout`) for `15` minutes after `5` failed login attempts.
 
 ### 🎨 4. Dual Design Systems & Unified Error Handling
-- **Public UI (Apple Liquid Glass)**: Ultra-minimal layout featuring a clean intro header above a translucent glass card, adaptive **Light (`#FFFFFF`) & Dark (`#090D16`)** themes via `prefers-color-scheme` plus a corner `Auto / Light / Dark` switcher.
+- **Public UI (Optical Glass / Ink Palette)**: Clean, quiet layout with an intro header above a tactile card, monospace security telemetry readout, expandable QR `.jpg` export, and adaptive **Light (`#FFFFFF`) & Dark (`#0B0D14`)** themes via `prefers-color-scheme` plus a corner `Auto / Light / Dark` switcher.
 - **Admin Dashboard (`/admin`, Norwegian Designsystemet)**: Code-split via `React.lazy()`, high-contrast data tables with `tabular-nums`, **Recharts** analytics, link controls (`Enable/Disable`, `Rescan`, inline limit editing `1..250`, delete), CVE blocked URL logs, and live service settings.
 - **Unified Error Page (`ErrorPage.tsx` — `/error/:code?reason=...`)**: One parameterized component renders every error state (`403`, `404`, `410`, `413`, `422`, `429`, `500`, `503`), including Nginx proxy errors (`413`, `502`, `504`).
 
@@ -84,7 +84,7 @@ flowchart LR
 ```text
 url-shortener/
 ├── .env.example                 # Environment variable template
-├── .gitignore                   # Git exclusions (.env, *.db, .venv, node_modules, dist, PLAN.md)
+├── .gitignore                   # Git exclusions (.env, *.db, .venv, node_modules, dist)
 ├── docker-compose.yml           # Production stack: postgres, redis, migrate, backend, frontend
 ├── backend/
 │   ├── Dockerfile               # Multi-stage Python 3.12-slim build (non-root)

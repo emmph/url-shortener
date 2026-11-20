@@ -15,58 +15,57 @@ const ERROR_CATALOG: Record<string, ErrorCatalogEntry> = {
   '410:unavailable': {
     code: 410,
     badge: '410 Gone',
-    title: 'Link Unavailable',
-    description: 'This link is no longer valid or has reached its maximum visit limit.',
+    title: 'Link unavailable',
+    description: 'This link is no longer valid or has reached its visit limit',
     icon: Clock,
   },
   '403:unsafe_url': {
     code: 403,
     badge: '403 Forbidden',
-    title: 'Access Blocked',
-    description:
-      'This URL was blocked by our security scanner due to detected CVE vulnerabilities or phishing risk.',
+    title: 'Access blocked',
+    description: 'Blocked by automated security screening due to CVE or phishing risk',
     icon: ShieldAlert,
   },
   '404:page_not_found': {
     code: 404,
     badge: '404 Not Found',
-    title: 'Page Not Found',
-    description: 'The requested page does not exist or has been removed.',
+    title: 'Page not found',
+    description: 'The requested page does not exist or has been removed',
     icon: FileWarning,
   },
   '413:payload_too_large': {
     code: 413,
     badge: '413 Payload Too Large',
-    title: 'Request Too Large',
-    description: 'The request body or URL length exceeds the allowed limit (2048 characters).',
+    title: 'Request too large',
+    description: 'The request body or URL exceeds the 2,048 character limit',
     icon: AlertTriangle,
   },
   '422:invalid_url': {
     code: 422,
     badge: '422 Unprocessable Entity',
-    title: 'Invalid Input',
-    description: 'The URL format is unsafe or invalid, or the click limit is outside 1–250.',
+    title: 'Invalid input',
+    description: 'Enter an http or https URL and a click limit between 1 and 250',
     icon: Ban,
   },
   '429:rate_limit': {
     code: 429,
     badge: '429 Too Many Requests',
-    title: 'Too Many Requests',
-    description: 'Rate limit exceeded. Please wait a few minutes and try again.',
+    title: 'Too many requests',
+    description: 'Rate limit reached for your address. Wait a few minutes and try again.',
     icon: Lock,
   },
   '503:maintenance': {
     code: 503,
     badge: '503 Service Unavailable',
-    title: 'Service Unavailable',
-    description: 'The service is under maintenance or temporarily overloaded.',
+    title: 'Service unavailable',
+    description: 'The service is temporarily unavailable for maintenance',
     icon: ServerCrash,
   },
   '500:server_error': {
     code: 500,
     badge: '500 Internal Server Error',
-    title: 'Internal Server Error',
-    description: 'Something went wrong on our end. Please try refreshing later.',
+    title: 'Internal server error',
+    description: 'Unexpected server error. Try refreshing in a moment.',
     icon: ServerCrash,
   },
 }
@@ -96,39 +95,40 @@ export default function ErrorPage() {
   const Icon = entry.icon
 
   return (
-    <main className="liquid-stage flex items-center justify-center px-4 py-12">
-      <div className="liquid-orb liquid-orb-1" aria-hidden="true" />
-      <div className="liquid-orb liquid-orb-2" aria-hidden="true" />
-
+    <main className="liquid-stage flex items-center justify-center px-6 py-12">
       <div className="fixed right-4 top-4 z-20">
         <ThemeToggle variant="glass" />
       </div>
 
-      <section className="liquid-glass-card w-full max-w-md p-8 text-center">
+      <section className="liquid-glass-card w-full max-w-md p-6 text-center">
         <div
-          className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl border"
-          style={{ background: 'var(--lg-pill-bg)', borderColor: 'var(--lg-pill-border)' }}
+          className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-[10px] border"
+          style={{ backgroundColor: 'var(--lg-pill-bg)', borderColor: 'var(--lg-pill-border)' }}
         >
-          <Icon className="h-7 w-7" style={{ color: 'var(--lg-text)' }} />
+          <Icon className="h-5 w-5" style={{ color: 'var(--lg-secondary)' }} strokeWidth={1.5} />
         </div>
 
         <span
-          className="liquid-glass-pill inline-block px-3.5 py-1 text-xs font-semibold tracking-wide"
-          style={{ color: 'var(--lg-muted)' }}
+          className="liquid-mono inline-block rounded-[6px] border px-3 py-1 text-xs font-medium"
+          style={{
+            backgroundColor: 'var(--lg-pill-bg)',
+            borderColor: 'var(--lg-pill-border)',
+            color: 'var(--lg-muted)',
+          }}
         >
           {entry.badge}
         </span>
 
-        <h1 className="mt-4 text-xl font-semibold" style={{ color: 'var(--lg-text)' }}>
+        <h1 className="mt-4 text-xl font-medium tracking-tight" style={{ color: 'var(--lg-text)' }}>
           {entry.title}
         </h1>
-        <p className="mt-2.5 text-sm leading-relaxed" style={{ color: 'var(--lg-muted)' }}>
+        <p className="mt-2 text-sm leading-6" style={{ color: 'var(--lg-secondary)' }}>
           {entry.description}
         </p>
 
         <div className="mt-6">
-          <Link to="/" className="liquid-button inline-flex items-center justify-center px-6 py-2.5 text-sm">
-            Back to Home
+          <Link to="/" className="liquid-button inline-flex h-10 items-center justify-center px-5 text-sm">
+            Back to home
           </Link>
         </div>
       </section>

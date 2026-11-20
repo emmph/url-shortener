@@ -10,7 +10,7 @@ export default function ScanningWait() {
   const navigate = useNavigate()
   const [statusData, setStatusData] = useState<ScanStatusResponse | null>(null)
 
-  // Poll scan status until safe or removed
+  // Poll Redis-backed scan status until safe or removed
   useEffect(() => {
     if (!shortCode) {
       navigate('/error/410?reason=unavailable', { replace: true })
@@ -49,45 +49,72 @@ export default function ScanningWait() {
 
   const remSeconds = statusData?.estimated_remaining_seconds ?? 15
   const etaText = statusData?.estimated_remaining_minutes_text ?? 'about 15 sec'
+  const progressRatio = Math.min(0.92, Math.max(0.18, (100 - remSeconds * 4) / 100))
 
   return (
-    <main className="liquid-stage flex items-center justify-center px-4 py-12">
-      <div className="liquid-orb liquid-orb-1" aria-hidden="true" />
-      <div className="liquid-orb liquid-orb-2" aria-hidden="true" />
-
+    <main className="liquid-stage flex items-center justify-center px-6 py-12">
       <div className="fixed right-4 top-4 z-20">
         <ThemeToggle variant="glass" />
       </div>
 
-      <section className="liquid-glass-card w-full max-w-md p-8 text-center">
+      <section className="liquid-glass-card w-full max-w-md p-6 text-center">
         <div
-          className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl border"
-          style={{ background: 'var(--lg-pill-bg)', borderColor: 'var(--lg-pill-border)' }}
+          className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-[10px] border"
+          style={{ backgroundColor: 'var(--lg-pill-bg)', borderColor: 'var(--lg-pill-border)' }}
         >
-          <ShieldCheck className="h-7 w-7 animate-pulse text-[#0062ba]" />
+          <ShieldCheck
+            className="h-5 w-5"
+            style={{ color: 'var(--lg-accent)' }}
+            strokeWidth={1.5}
+          />
         </div>
 
-        <h1 className="text-xl font-semibold tracking-tight" style={{ color: 'var(--lg-text)' }}>
-          Security Scan in Progress
+        {/* Signature monospace security readout */}
+        <div
+          className="liquid-mono mb-3 inline-flex items-center gap-2 rounded-[6px] border px-3 py-1 text-xs"
+          style={{
+            backgroundColor: 'var(--lg-pill-bg)',
+            borderColor: 'var(--lg-pill-border)',
+            color: 'var(--lg-muted)',
+          }}
+        >
+          <span
+            className="inline-block h-1.5 w-1.5 rounded-full"
+            style={{ backgroundColor: 'var(--lg-status-warn)' }}
+            aria-hidden="true"
+          />
+          <span>Scanning · TLS, CVE, SSRF</span>
+        </div>
+
+        <h1 className="text-xl font-medium tracking-tight" style={{ color: 'var(--lg-text)' }}>
+          Security scan in progress
         </h1>
 
-        <p className="mt-3 text-sm leading-relaxed" style={{ color: 'var(--lg-muted)' }}>
-          This link is temporarily unavailable until our automated CVE and safety check finishes. It
-          should be ready in <strong style={{ color: 'var(--lg-text)' }}>{etaText}</strong>.
+        <p className="mt-2 text-sm leading-6" style={{ color: 'var(--lg-secondary)' }}>
+          This link opens once automated CVE and host safety checks finish. Estimated wait:{' '}
+          <span className="liquid-mono font-medium" style={{ color: 'var(--lg-text)' }}>
+            {etaText}
+          </span>
+          .
         </p>
 
-        <div className="mt-6">
+        {/* GPU-composited scaleX bar avoids animating width */}
+        <div className="mt-6 space-y-2">
           <div
-            className="h-2 w-full overflow-hidden rounded-md"
-            style={{ background: 'var(--lg-slider-track)' }}
+            className="h-1.5 w-full overflow-hidden rounded-[4px]"
+            style={{ backgroundColor: 'var(--lg-slider-track)' }}
           >
             <div
-              className="h-full rounded-md bg-[#0062ba] transition-all duration-700"
-              style={{ width: `${Math.min(92, Math.max(18, 100 - remSeconds * 4))}%` }}
+              className="h-full w-full origin-left rounded-[4px] transition-transform duration-300"
+              style={{
+                backgroundColor: 'var(--lg-accent)',
+                transform: `scaleX(${progressRatio})`,
+                transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)',
+              }}
             />
           </div>
-          <p className="mt-2.5 text-xs" style={{ color: 'var(--lg-muted)' }}>
-            {statusData?.stage ?? 'Checking TLS, headers, and known CVEs...'}
+          <p className="liquid-mono text-xs" style={{ color: 'var(--lg-muted)' }}>
+            {statusData?.stage ?? 'Checking TLS, headers, and known CVEs'}
           </p>
         </div>
       </section>

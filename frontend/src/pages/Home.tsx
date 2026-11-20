@@ -92,7 +92,7 @@ export default function Home() {
     const ctx = exportCanvas.getContext('2d')
     if (!ctx) return
 
-    // Paint pure white backdrop so JPEG stays sharp
+    // Paint pure white backdrop so JPEG stays crisp
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height)
     ctx.imageSmoothingEnabled = false
@@ -104,38 +104,42 @@ export default function Home() {
     link.click()
   }
 
-  return (
-    <main className="liquid-stage flex flex-col items-center justify-center px-4 py-12">
-      <div className="liquid-orb liquid-orb-1" aria-hidden="true" />
-      <div className="liquid-orb liquid-orb-2" aria-hidden="true" />
+  const isSafe = result?.scan_status === 'SAFE'
+  const clickBudgetLabel = result
+    ? result.max_clicks === null
+      ? 'Unlimited'
+      : `${result.max_clicks} ${result.max_clicks === 1 ? 'click' : 'clicks'}`
+    : ''
 
-      {/* Subtle corner theme toggle matching OS preference by default */}
+  return (
+    <main className="liquid-stage flex flex-col items-center justify-center px-6 py-12">
+      {/* Corner theme toggle synced with OS preference by default */}
       <div className="fixed right-4 top-4 z-20">
         <ThemeToggle variant="glass" />
       </div>
 
-      {/* Short, clean intro above the form */}
-      <header className="relative z-10 mb-20 w-full max-w-[640px] space-y-2.5 text-center">
+      {/* Centered service intro spaced 32px above the main card */}
+      <header className="mb-8 w-full max-w-[700px] space-y-2 text-center">
         <h1
-          className="text-2xl font-semibold tracking-tight sm:text-3xl"
+          className="text-2xl font-medium tracking-tight sm:text-3xl"
           style={{ color: 'var(--lg-text)' }}
         >
           Fast, safe short links
         </h1>
         <p
-          className="mx-auto max-w-[540px] text-sm leading-relaxed sm:text-base"
-          style={{ color: 'var(--lg-muted)' }}
+          className="mx-auto max-w-[540px] text-sm leading-6 sm:text-base"
+          style={{ color: 'var(--lg-secondary)' }}
         >
-          Create permanent or click-limited links with instant QR codes in seconds. Every
-          destination is screened for known vulnerabilities and malicious hosts in the background.
+          Create permanent or click-limited links with instant QR codes. Every destination is
+          screened for known vulnerabilities and malicious hosts in the background.
         </p>
       </header>
 
-      {/* Wider main card so URL input grows ~50% */}
-      <section className="liquid-glass-card w-full max-w-[700px] p-6 sm:p-8">
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Keep switcher at original compact width */}
-          <div className="mx-auto w-full max-w-[448px] space-y-3">
+      {/* Main surface card (max-w-700px keeps URL input ~50% wider) */}
+      <section className="liquid-glass-card w-full max-w-[700px] p-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Centered mode switcher whose right edge aligns with the URL input edge (108px = 96px button + 12px gap) */}
+          <div className="w-full space-y-3 sm:px-[108px]">
             <div className="liquid-segmented" role="tablist" aria-label="Link mode">
               <button
                 type="button"
@@ -159,9 +163,12 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Slider + number input shown only in limited mode */}
+            {/* Slider + synced numeric input shown only in limited mode */}
             {mode === 'limited' && (
-              <div className="liquid-glass-pill flex items-center gap-3 px-4 py-2.5">
+              <div className="liquid-glass-pill flex items-center gap-3 px-4 py-2">
+                <span className="liquid-mono text-xs" style={{ color: 'var(--lg-muted)' }}>
+                  Clicks
+                </span>
                 <input
                   type="range"
                   min={1}
@@ -178,18 +185,19 @@ export default function Home() {
                   value={limitCount}
                   onChange={(e) => handleLimitChange(Number(e.target.value))}
                   aria-label="Custom click limit (1 to 250)"
-                  className="liquid-input w-20 px-3 py-1.5 text-center text-sm font-semibold tabular-nums"
+                  className="liquid-input liquid-mono h-8 w-20 px-3 text-center text-sm font-medium tabular-nums"
                 />
               </div>
             )}
           </div>
 
-          {/* Wide URL input (~50% wider) + fixed-width button */}
+          {/* Wide URL field + fixed-width primary submit action */}
           <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Link2
-                className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2"
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2"
                 style={{ color: 'var(--lg-muted)' }}
+                strokeWidth={1.5}
                 aria-hidden="true"
               />
               <input
@@ -197,96 +205,122 @@ export default function Home() {
                 required
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
-                placeholder="https://example.com/..."
+                placeholder="https://example.com/path"
                 aria-label="URL to shorten"
-                className="liquid-input py-3.5 pl-10 pr-4 text-sm sm:text-base"
+                className="liquid-input h-11 pl-9 pr-4 text-sm sm:text-base"
               />
             </div>
             <button
               type="submit"
               disabled={loading || !urlInput.trim()}
-              className="liquid-button shrink-0 px-6 py-3.5 text-sm sm:text-base whitespace-nowrap"
+              className="liquid-button h-11 shrink-0 px-5 text-sm whitespace-nowrap sm:w-24 sm:px-0"
             >
-              {loading ? 'Shortening...' : 'Shorten'}
+              {loading ? 'Shortening' : 'Shorten'}
             </button>
           </div>
         </form>
 
-        {/* Compact result box + expandable QR code block */}
+        {/* Generated result row + expandable QR code block */}
         {result && (
-          <div className="mt-5 space-y-3">
-            <div className="liquid-glass-pill flex items-center justify-between gap-3 px-4 py-2.5">
-              <a
-                href={result.short_url}
-                className="truncate text-sm font-medium underline underline-offset-4"
-                style={{ color: 'var(--lg-text)' }}
-              >
-                {result.short_url}
-              </a>
-              <button
-                type="button"
-                onClick={handleCopy}
-                className="liquid-copy-btn inline-flex shrink-0 items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold"
-              >
-                {copied ? (
-                  <>
-                    <Check className="h-3.5 w-3.5" />
-                    Copied
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-3.5 w-3.5" />
-                    Copy
-                  </>
-                )}
-              </button>
+          <div className="mt-6 space-y-3">
+            <div className="liquid-glass-pill flex flex-col justify-between gap-3 p-3 sm:flex-row sm:items-center">
+              <div className="min-w-0 space-y-1">
+                <a
+                  href={result.short_url}
+                  className="liquid-mono block truncate text-sm font-medium underline underline-offset-4"
+                  style={{ color: 'var(--lg-text)' }}
+                >
+                  {result.short_url}
+                </a>
+                {/* Signature monospace telemetry readout */}
+                <div
+                  className="liquid-mono flex items-center gap-2 text-xs"
+                  style={{ color: 'var(--lg-muted)' }}
+                >
+                  <span
+                    className="inline-block h-1.5 w-1.5 rounded-full"
+                    style={{
+                      backgroundColor: isSafe ? 'var(--lg-status-safe)' : 'var(--lg-status-warn)',
+                    }}
+                    aria-hidden="true"
+                  />
+                  <span>{isSafe ? 'Safe · CVE verified' : 'Pending · CVE scan'}</span>
+                  <span aria-hidden="true">·</span>
+                  <span>{clickBudgetLabel}</span>
+                </div>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowQr((prev) => !prev)}
+                  aria-expanded={showQr}
+                  className="liquid-copy-btn inline-flex h-8 items-center gap-2 px-3 text-xs font-medium"
+                >
+                  <QrCode className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                  <span>{showQr ? 'Hide QR code' : 'Show QR code'}</span>
+                  {showQr ? (
+                    <ChevronUp className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="liquid-copy-btn inline-flex h-8 items-center gap-2 px-3 text-xs font-medium"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                      <span>Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
-            {/* Subtle QR toggle inside the main card */}
-            <div className="flex justify-center">
-              <button
-                type="button"
-                onClick={() => setShowQr((prev) => !prev)}
-                aria-expanded={showQr}
-                className="liquid-copy-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium"
-              >
-                <QrCode className="h-3.5 w-3.5" />
-                {showQr ? 'Hide QR code' : 'Show QR code'}
-                {showQr ? (
-                  <ChevronUp className="h-3.5 w-3.5" />
-                ) : (
-                  <ChevronDown className="h-3.5 w-3.5" />
-                )}
-              </button>
-            </div>
-
-            {/* Expanded QR preview and JPG export inside main card */}
+            {/* Expandable optical QR moment inside the main card */}
             {showQr && (
               <div className="liquid-glass-pill flex flex-col items-center justify-between gap-4 p-4 sm:flex-row">
                 <div className="flex items-center gap-4">
-                  <div className="rounded-[10px] bg-white p-2 shadow-sm">
+                  <div
+                    className="rounded-[6px] border bg-white p-2"
+                    style={{ borderColor: 'var(--lg-pill-border)' }}
+                  >
                     <QRCodeCanvas
                       ref={qrCanvasRef}
                       value={result.short_url}
                       size={132}
                       level="M"
                       bgColor="#ffffff"
-                      fgColor="#0f172a"
+                      fgColor="#111827"
                       marginSize={2}
                     />
                   </div>
                   <div className="space-y-1 text-left">
                     <div
-                      className="text-sm font-semibold"
+                      className="text-sm font-medium"
                       style={{ color: 'var(--lg-text)' }}
                     >
-                      QR Code Ready
+                      QR code ready
                     </div>
                     <div
-                      className="text-xs leading-relaxed"
+                      className="text-xs leading-5"
+                      style={{ color: 'var(--lg-secondary)' }}
+                    >
+                      Scan with any camera or export a crisp 512×512 JPG
+                    </div>
+                    <div
+                      className="liquid-mono pt-1 text-xs"
                       style={{ color: 'var(--lg-muted)' }}
                     >
-                      Scan directly or save as a JPG image.
+                      /{result.short_code} · JPG 512×512
                     </div>
                   </div>
                 </div>
@@ -294,10 +328,10 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={handleDownloadQr}
-                  className="liquid-button inline-flex shrink-0 items-center gap-2 px-4 py-2.5 text-xs sm:text-sm"
+                  className="liquid-button inline-flex h-10 shrink-0 items-center gap-2 px-4 text-xs sm:text-sm"
                 >
-                  <Download className="h-4 w-4" />
-                  Download JPG
+                  <Download className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                  <span>Download JPG</span>
                 </button>
               </div>
             )}

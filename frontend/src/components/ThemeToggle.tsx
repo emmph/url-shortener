@@ -37,11 +37,11 @@ export function ThemeToggle({ variant = 'glass' }: ThemeToggleProps) {
     <button
       type="button"
       onClick={cycleTheme}
-      className="liquid-theme-btn inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium"
+      className="liquid-theme-btn inline-flex h-8 items-center gap-2 px-3 text-xs font-medium"
       title="Switch color theme (Auto / Light / Dark)"
       aria-label={`Theme: ${label}`}
     >
-      <Icon className="h-3.5 w-3.5" />
+      <Icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
       <span>{label}</span>
     </button>
   )
